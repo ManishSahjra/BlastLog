@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import random
-import smtplib
-from email.mime.text import MIMEText
 import threading
 import io
 from datetime import datetime
@@ -17,6 +15,7 @@ from openpyxl.styles import Font
 import re
 import os
 from dotenv import load_dotenv
+import resend
 
 load_dotenv()
 
@@ -24,8 +23,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
 # Gmail Credentials
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-APP_PASSWORD = os.getenv("APP_PASSWORD")
+# Resend API Key
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 
 @app.route("/")
@@ -49,27 +49,17 @@ Do not share this OTP with anyone.
 Thank You.
 """
 
-        message = MIMEText(body)
-        message["Subject"] = subject
-        message["From"] = EMAIL_ADDRESS
-        message["To"] = receiver_email
-
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(EMAIL_ADDRESS, APP_PASSWORD)
-        server.sendmail(
-            EMAIL_ADDRESS,
-            receiver_email,
-            message.as_string()
-        )
-        server.quit()
+        resend.Emails.send({
+            "from": "onboarding@resend.dev",
+            "to": receiver_email,
+            "subject": subject,
+            "text": body
+        })
 
         print("OTP sent successfully.")
 
     except Exception as e:
         print("Email Error:", e)
-
-
 @app.route("/register", methods=["POST"])
 def register():
 
