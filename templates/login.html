@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Register</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+    :root {
+        --paper: #eef1f4;
+        --paper-line: #ccd6e0;
+        --ink: #1b2a41;
+        --ink-soft: #4b6584;
+        --amber: #e2790f;
+        --amber-soft: #fbe4c8;
+        --red: #c0392b;
+        --card-bg: #ffffff;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--paper);
+        background-image:
+            linear-gradient(var(--paper-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+        background-size: 34px 34px;
+        color: var(--ink);
+    }
+
+    h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        margin: 0 0 10px;
+        color: var(--ink);
+    }
+
+    p {
+        font-size: 14px;
+        line-height: 1.5;
+        letter-spacing: 0.3px;
+        margin: 15px 0 25px;
+    }
+
+    .container {
+        background-color: var(--card-bg);
+        border: 1px solid var(--paper-line);
+        border-radius: 6px;
+        box-shadow: 0 20px 40px rgba(27, 42, 65, 0.14);
+        position: relative;
+        overflow: hidden;
+        width: 800px;
+        max-width: 100%;
+        min-height: 500px;
+    }
+
+    .form-container {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        transition: all 0.6s ease-in-out;
+    }
+
+    form {
+        background-color: var(--card-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 50px;
+        height: 100%;
+        text-align: center;
+    }
+
+    .input-group {
+        width: 100%;
+        margin: 8px 0;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--paper-line);
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        color: var(--ink);
+        background-color: #fbfcfd;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    }
+
+    .input-group input:focus {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 3px rgba(226, 121, 15, 0.12);
+        background-color: #fff;
+    }
+
+    .forgot-link {
+        color: var(--amber);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        text-decoration: none;
+        margin: 12px 0 20px;
+    }
+
+    .login-error {
+        background-color: #fdeeec;
+        border: 1px solid #f0c2bb;
+        color: var(--red);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 18px;
+        width: 100%;
+    }
+
+    .btn {
+        border-radius: 6px;
+        border: none;
+        background-color: var(--ink);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 12px 45px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn:hover {
+        background-color: #10192a;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .ghost-btn {
+        background-color: transparent;
+        border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .ghost-btn:hover {
+        background-color: rgba(255,255,255,0.12);
+    }
+
+    /* Login sits on top by default, full width */
+    .login-container {
+        left: 0;
+        width: 50%;
+        z-index: 2;
+    }
+
+    /* Register hidden behind, no opacity, off to left */
+    .register-container {
+        left: 0;
+        width: 50%;
+        opacity: 0;
+        z-index: 1;
+    }
+
+    /* Overlay panel container */
+    .overlay-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        transition: transform 0.6s ease-in-out;
+        z-index: 100;
+    }
+
+    .overlay {
+        background-color: var(--ink);
+        background-image:
+            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        background-size: 24px 24px;
+        color: #fff;
+        position: relative;
+        left: -100%;
+        height: 100%;
+        width: 200%;
+        transform: translateX(0);
+        transition: transform 0.6s ease-in-out;
+    }
+
+    .overlay-panel {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 40px;
+        text-align: center;
+        top: 0;
+        height: 100%;
+        width: 50%;
+    }
+
+    .overlay-panel h1 {
+        color: #fff;
+    }
+
+    .overlay-panel p {
+        color: rgba(255,255,255,0.75);
+    }
+
+    .overlay-left {
+        transform: translateX(-20%);
+        left: 0;
+    }
+
+    .overlay-right {
+        right: 0;
+        transform: translateX(0);
+    }
+
+    /* ---- Active state: switches to Register mode ---- */
+
+    .container.active .login-container {
+        transform: translateX(100%);
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .container.active .register-container {
+        transform: translateX(100%);
+        opacity: 1;
+        z-index: 5;
+    }
+
+    .container.active .overlay-container {
+        transform: translateX(-100%);
+    }
+
+    .container.active .overlay {
+        transform: translateX(50%);
+    }
+
+    .container.active .overlay-left {
+        transform: translateX(0);
+    }
+
+    .container.active .overlay-right {
+        transform: translateX(20%);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            width: 95%;
+            min-height: 650px;
+        }
+
+        .login-container,
+        .register-container,
+        .overlay-container {
+            position: relative;
+            width: 100%;
+            left: 0;
+        }
+
+        .overlay-container {
+            display: none;
+        }
+
+        .register-container {
+            display: none;
+        }
+
+        .container.active .login-container {
+            display: none;
+        }
+
+        .container.active .register-container {
+            display: block;
+            transform: none;
+            opacity: 1;
+        }
+    }
+</style>
+</head>
+<body>
+
+  <div class="container" id="container">
+
+    <!-- Register Form -->
+    <div class="form-container register-container">
+      <form id="registerForm" action="{{ url_for('register') }}" method="POST">
+        <h1>Create Account</h1>
+
+        <div class="input-group">
+          <input type="text" name="Employee ID" placeholder="Employee No" required>
+        </div>
+
+        <div class="input-group">
+          <input type="email" name="email" placeholder="Email" required>
+        </div>
+
+        <div class="input-group">
+          <input type="text" name="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="btn">Sign Up</button>
+      </form>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-container login-container">
+      <form id="loginForm" action="{{ url_for('login') }}" method="POST">
+        <h1>Welcome Back</h1>
+
+        <div class="input-group">
+          <input type="text" name="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+
+        <a href="#" class="forgot-link">Forgot your password?</a>
+                    {% if login_error %}
+                    <div class="login-error">
+                          {{ login_error }}
+                    </div>
+                    {% endif %}
+        <button type="submit" class="btn">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Overlay / Toggle Panel -->
+    <div class="overlay-container">
+      <div class="overlay">
+
+        <div class="overlay-panel overlay-left">
+          <h1>Welcome Back!</h1>
+          <p>Already have an account? Sign in to keep connected with us.</p>
+          <button type="button" class="btn ghost-btn" id="showLogin">Sign In</button>
+        </div>
+
+        <div class="overlay-panel overlay-right">
+          <h1>Hello, Friend!</h1>
+          <p>Don't have an account yet? Register now and get started.</p>
+          <button type="button" class="btn ghost-btn" id="showRegister">Sign Up</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  const container = document.getElementById('container');
+  const showRegister = document.getElementById('showRegister');
+  const showLogin = document.getElementById('showLogin');
+
+  showRegister.addEventListener('click', () => {
+    container.classList.add('active');
+  });
+
+  showLogin.addEventListener('click', () => {
+    container.classList.remove('active');
+  });
+</script>
+
+</body>
+</html>

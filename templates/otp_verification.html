@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+        :root {
+            --paper: #eef1f4;
+            --paper-line: #ccd6e0;
+            --ink: #1b2a41;
+            --ink-soft: #4b6584;
+            --amber: #e2790f;
+            --amber-soft: #fbe4c8;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .otp-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--paper);
+            background-image:
+                linear-gradient(var(--paper-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+            background-size: 34px 34px;
+            padding: 20px;
+        }
+
+        .otp-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--paper-line);
+            border-radius: 6px;
+            box-shadow: 0 20px 40px rgba(27, 42, 65, 0.14);
+            width: 420px;
+            max-width: 100%;
+            padding: 45px 40px;
+            text-align: center;
+        }
+
+        .otp-icon {
+            margin-bottom: 15px;
+        }
+
+        .otp-card h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0 0 10px;
+        }
+
+        .otp-subtext {
+            font-size: 14px;
+            color: var(--ink-soft);
+            margin: 0 0 30px;
+        }
+
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .otp-box {
+            width: 45px;
+            height: 55px;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 22px;
+            font-weight: 600;
+            border: 1px solid var(--paper-line);
+            border-radius: 6px;
+            background-color: #fbfcfd;
+            outline: none;
+            color: var(--ink);
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+
+        .otp-box:focus {
+            border-color: var(--amber);
+            box-shadow: 0 0 0 3px rgba(226, 121, 15, 0.15);
+            background-color: #fff;
+        }
+
+        .btn {
+            width: 100%;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--ink);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 13px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn:hover {
+            background-color: #10192a;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+<div class="otp-wrapper">
+  <div class="otp-card">
+
+    <div class="otp-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L3 7v6c0 5 3.8 8.6 9 9 5.2-.4 9-4 9-9V7l-9-5z" stroke="#e2790f" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M9 12l2 2 4-4" stroke="#e2790f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <h1>Verify Your Account</h1>
+    <p class="otp-subtext">Enter the 6-digit code we sent you</p>
+
+    <form action="/verify-otp" method="POST" id="otpForm">
+
+      <!-- This hidden field is what actually gets sent as "otp" to your Python backend -->
+      <input type="hidden" name="otp" id="otpValue">
+
+      <div class="otp-inputs">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box" autofocus>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box">
+      </div>
+
+      <button type="submit" class="btn">Verify</button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  const boxes = document.querySelectorAll(".otp-box");
+  const hiddenInput = document.getElementById("otpValue");
+  const form = document.getElementById("otpForm");
+
+  boxes.forEach((box, index) => {
+    box.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+      if (e.target.value && index < boxes.length - 1) {
+        boxes[index + 1].focus();
+      }
+    });
+
+    box.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !e.target.value && index > 0) {
+        boxes[index - 1].focus();
+      }
+    });
+
+    box.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData)
+        .getData("text")
+        .replace(/[^0-9]/g, "")
+        .slice(0, boxes.length);
+
+      pasted.split("").forEach((char, i) => {
+        if (boxes[i]) boxes[i].value = char;
+      });
+
+      const nextIndex = Math.min(pasted.length, boxes.length - 1);
+      boxes[nextIndex].focus();
+    });
+  });
+
+  // Combine the 6 boxes into the single "otp" field before submitting
+  form.addEventListener("submit", () => {
+    hiddenInput.value = Array.from(boxes).map(b => b.value).join("");
+  });
+</script>
+
+</body>
+</html>

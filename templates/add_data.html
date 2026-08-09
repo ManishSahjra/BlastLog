@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Data - BlastLog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --paper: #eef1f4;
+        --paper-line: #ccd6e0;
+        --ink: #1b2a41;
+        --ink-soft: #4b6584;
+        --amber: #e2790f;
+        --amber-soft: #fbe4c8;
+        --green: #2e8b57;
+        --red: #c0392b;
+        --card-bg: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--paper);
+        background-image:
+            linear-gradient(var(--paper-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+        background-size: 34px 34px;
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+
+    /* ---------- Navbar ---------- */
+    .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 44px;
+        border-bottom: 1px solid var(--paper-line);
+        background-color: rgba(238, 241, 244, 0.85);
+        backdrop-filter: blur(6px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        text-decoration: none;
+    }
+
+    .logo-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        background-color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background-color: var(--ink);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 12px;
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .logout-btn {
+        background: none;
+        border: 1px solid var(--paper-line);
+        color: var(--ink-soft);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .logout-btn:hover {
+        border-color: var(--ink-soft);
+        color: var(--ink);
+    }
+
+    /* ---------- Main ---------- */
+    .main {
+        flex: 1;
+        padding: 44px 44px 80px;
+    }
+
+    .page-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        color: var(--ink-soft);
+        text-decoration: none;
+        margin-bottom: 22px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--amber);
+    }
+
+    .form-card, .table-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--paper-line);
+        border-radius: 6px;
+        padding: 34px;
+        margin-bottom: 26px;
+    }
+
+    .section-eyebrow {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--amber);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .section-eyebrow::before {
+        content: "";
+        width: 18px;
+        height: 1px;
+        background-color: var(--amber);
+    }
+
+    .form-header h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .form-header p {
+        font-size: 13.5px;
+        color: var(--ink-soft);
+        margin-bottom: 30px;
+    }
+
+    .field-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .field label {
+        display: block;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--ink-soft);
+        margin-bottom: 8px;
+    }
+
+    .field input {
+        width: 100%;
+        padding: 11px 13px;
+        border: 1px solid var(--paper-line);
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-family: 'Inter', sans-serif;
+        color: var(--ink);
+        outline: none;
+        background-color: #fbfcfd;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 3px rgba(226, 121, 15, 0.12);
+        background-color: #fff;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 6px;
+        padding: 12px 26px;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-secondary {
+        background-color: transparent;
+        border: 1px solid var(--paper-line);
+        color: var(--ink-soft);
+    }
+    .btn-secondary:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+    .btn-primary {
+        background-color: var(--ink);
+        color: #fff;
+    }
+    .btn-primary:hover { background-color: #10192a; }
+
+    .success-toast {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        background-color: #e7f5ec;
+        border: 1px solid #c7e6d3;
+        color: var(--green);
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 22px;
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ---------- Table ---------- */
+    .table-card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .table-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 26px 30px 20px;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .table-card-header h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .table-count {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        color: var(--ink-soft);
+        background-color: var(--paper);
+        border: 1px solid var(--paper-line);
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .table-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    thead th {
+        text-align: left;
+        padding: 12px 16px;
+        background-color: var(--paper);
+        color: var(--ink-soft);
+        font-family: 'IBM Plex Mono', monospace;
+        font-weight: 600;
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        border-top: 1px solid var(--paper-line);
+        border-bottom: 1px solid var(--paper-line);
+        white-space: nowrap;
+    }
+
+    tbody td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #f0f2f5;
+        color: var(--ink);
+        white-space: nowrap;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12.5px;
+    }
+
+    tbody tr:hover {
+        background-color: #fbfaf7;
+    }
+
+    .delete-btn {
+        background: none;
+        border: 1px solid var(--paper-line);
+        color: var(--red);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-family: 'Inter', sans-serif;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .delete-btn:hover {
+        background-color: #fdeeec;
+        border-color: #f0c2bb;
+    }
+
+
+    .clear-btn {
+      border: 1px solid #e0b4aa;
+      background-color: transparent;
+      color: var(--red);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      background-color: #fdeeec;
+      border-color: var(--red);
+    }
+
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--paper-line);
+      background-color: var(--ink);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .export-btn:hover {
+      background-color: #10192a;
+    }
+</style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#fff"/>
+          <rect x="13" y="3" width="8" height="8" rx="1.5" fill="#fff" opacity="0.55"/>
+          <rect x="3" y="13" width="8" height="8" rx="1.5" fill="#fff" opacity="0.55"/>
+          <rect x="13" y="13" width="8" height="8" rx="1.5" fill="#fff" opacity="0.3"/>
+        </svg>
+      </div>
+      BlastLog
+    </a>
+
+    <div class="user-menu">
+      <div class="avatar">{{ username[:2]|upper }}</div>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-wrap">
+
+<a href="{{ url_for('dashboard') }}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5m0 0l7 7m-7-7l7-7"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+    </svg>
+    Back to Home
+</a>
+
+      <div class="form-card">
+        <div class="section-eyebrow">New Entry</div>
+        <div class="form-header">
+          <h1>Add Blast Report</h1>
+          <p>Enter the blast parameters below to save a new record.</p>
+        </div>
+
+        <div class="success-toast" id="successToast">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>
+          Report saved successfully!
+        </div>
+
+        <form id="reportForm" action="{{ url_for('save_blast') }}" method="POST">
+          <div class="field-grid">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" name="date" required>
+            </div>
+            <div class="field">
+              <label>Location</label>
+              <input type="text" name="location" placeholder="location" required>
+            </div>
+            <div class="field">
+              <label>Holes</label>
+              <input type="number" name="holes" min="1" placeholder="No. of holes" required>
+            </div>
+            <div class="field">
+              <label>Depth (m)</label>
+              <input type="number" step="0.01" name="depth" placeholder="Hole depth" required>
+            </div>
+            <div class="field">
+              <label>Burden (m)</label>
+              <input type="number" step="0.01" name="burden" placeholder="Burden distance" required>
+            </div>
+            <div class="field">
+              <label>Spacing (m)</label>
+              <input type="number" step="0.01" name="spacing" placeholder="Spacing distance" required>
+            </div>
+            <div class="field">
+              <label>Explosives</label>
+              <input type="text" name="explosives" placeholder="explosives" required>
+            </div>
+            <div class="field">
+              <label>Volume</label>
+              <input type="number" step="0.01" name="volume" placeholder="Explosive quantity" required>
+            </div>
+            <div class="field">
+              <label>PF</label>
+              <input type="number" step="0.01" name="pf" placeholder="e.g. 0.85" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="index.html" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Report</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <h2>Saved Reports</h2>
+            <span class="table-count mono">{{ logs|length }} entries</span>
+          </div>
+
+          <div class="table-header-actions">
+            <a href="{{ url_for('export_excel') }}" class="export-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Generate Excel
+            </a>
+
+            <form action="{{ url_for('clear_month') }}" method="POST" style="display:inline;">
+              <button type="submit" class="clear-btn"
+                      onclick="return confirm('Clear this month's reports from view? They will be hidden from the list and export, but kept in the database.');">
+                Clear This Month
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <tr>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Holes</th>
+              <th>Depth</th>
+              <th>Burden</th>
+              <th>Spacing</th>
+              <th>Explosives</th>
+              <th>Volume</th>
+              <th>PF</th>
+              <th></th>
+            </tr>
+
+            {% for log in logs %}
+            <tr>
+              <td>{{ log.blast_date }}</td>
+              <td>{{ log.location }}</td>
+              <td>{{ log.holes }}</td>
+              <td>{{ log.depth }}</td>
+              <td>{{ log.burden }}</td>
+              <td>{{ log.spacing }}</td>
+              <td>{{ log.explosives }}</td>
+              <td>{{ log.volume }}</td>
+              <td>{{ log.pf }}</td>
+              <td>
+                <form action="{{ url_for('delete_blast', blast_id=log.blast_id) }}"
+                      method="POST">
+                  <button type="submit" class="delete-btn"
+                          onclick="return confirm('Are you sure you want to delete this report?')">
+                    Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<script>
+  const form = document.getElementById("reportForm");
+  const toast = document.getElementById("successToast");
+</script>
+
+</body>
+</html>

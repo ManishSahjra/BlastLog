@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlastLog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --paper: #eef1f4;
+        --paper-line: #ccd6e0;
+        --ink: #1b2a41;
+        --ink-soft: #4b6584;
+        --amber: #e2790f;
+        --amber-soft: #fbe4c8;
+        --green: #2e8b57;
+        --card-bg: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--paper);
+        background-image:
+            linear-gradient(var(--paper-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+        background-size: 34px 34px;
+        color: var(--ink);
+        min-height: 100vh;
+    }
+
+    .mono {
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ---------- Topbar ---------- */
+    .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 44px;
+        border-bottom: 1px solid var(--paper-line);
+        background-color: rgba(238, 241, 244, 0.85);
+        backdrop-filter: blur(6px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: 0.2px;
+    }
+
+    .logo-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        background-color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        color: var(--green);
+        background-color: #e7f5ec;
+        border: 1px solid #c7e6d3;
+        padding: 5px 10px;
+        border-radius: 20px;
+        margin-left: 14px;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: var(--green);
+        box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.18);
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background-color: var(--ink);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 12px;
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .logout-btn {
+        background: none;
+        border: 1px solid var(--paper-line);
+        color: var(--ink-soft);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .logout-btn:hover {
+        border-color: var(--ink-soft);
+        color: var(--ink);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 60px 44px 10px;
+    }
+
+    .eyebrow {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11.5px;
+        letter-spacing: 2px;
+        color: var(--amber);
+        text-transform: uppercase;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .eyebrow::before {
+        content: "";
+        width: 20px;
+        height: 1px;
+        background-color: var(--amber);
+    }
+
+    .hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        margin-bottom: 10px;
+    }
+
+    .hero p {
+        font-size: 14.5px;
+        color: var(--ink-soft);
+        max-width: 480px;
+        line-height: 1.6;
+    }
+
+    /* Stat readout strip */
+    .stat-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background-color: var(--paper-line);
+        border: 1px solid var(--paper-line);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 36px;
+    }
+
+    @media (max-width: 760px) {
+        .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-cell {
+        background-color: var(--card-bg);
+        padding: 18px 20px;
+        border-left: 3px solid transparent;
+        transition: border-color 0.2s;
+    }
+
+    .stat-cell:hover {
+        border-left-color: var(--amber);
+    }
+
+    .stat-cell .label {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 8px;
+    }
+
+    .stat-cell .value {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .stat-cell .value span {
+        font-size: 12px;
+        color: var(--ink-soft);
+        font-weight: 500;
+        margin-left: 3px;
+    }
+
+    /* ---------- Modules ---------- */
+    .modules {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 50px 44px 80px;
+    }
+
+    .modules-label {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 20px;
+    }
+
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 800px) {
+        .module-grid { grid-template-columns: 1fr; }
+    }
+
+    .module-card {
+        position: relative;
+        background-color: var(--card-bg);
+        border: 1px solid var(--paper-line);
+        border-radius: 4px;
+        padding: 30px 26px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .module-card::before,
+    .module-card::after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        transition: border-color 0.25s ease, width 0.25s ease, height 0.25s ease;
+    }
+
+    .module-card::before {
+        top: -1px;
+        left: -1px;
+        border-top: 2px solid transparent;
+        border-left: 2px solid transparent;
+    }
+
+    .module-card::after {
+        bottom: -1px;
+        right: -1px;
+        border-bottom: 2px solid transparent;
+        border-right: 2px solid transparent;
+    }
+
+    .module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 30px rgba(27, 42, 65, 0.12);
+    }
+
+    .module-card:hover::before {
+        border-top-color: var(--amber);
+        border-left-color: var(--amber);
+        width: 20px;
+        height: 20px;
+    }
+
+    .module-card:hover::after {
+        border-bottom-color: var(--amber);
+        border-right-color: var(--amber);
+        width: 20px;
+        height: 20px;
+    }
+
+    .module-index {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        color: var(--ink-soft);
+        margin-bottom: 18px;
+    }
+
+    .module-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .module-icon.purple { background-color: #eef0ff; color: #5850ec; }
+    .module-icon.blue   { background-color: #e8f2ff; color: #2f7fd6; }
+    .module-icon.amber  { background-color: var(--amber-soft); color: var(--amber); }
+
+    .module-card h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .module-card p {
+        font-size: 13px;
+        color: var(--ink-soft);
+        line-height: 1.55;
+        margin-bottom: 22px;
+    }
+
+    .module-enter {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--ink);
+    }
+
+    .module-enter svg {
+        transition: transform 0.2s ease;
+    }
+
+    .module-card:hover .module-enter svg {
+        transform: translateX(4px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .module-card, .module-card *, .stat-cell {
+            transition: none !important;
+        }
+    }
+</style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#fff"/>
+          <rect x="13" y="3" width="8" height="8" rx="1.5" fill="#fff" opacity="0.55"/>
+          <rect x="3" y="13" width="8" height="8" rx="1.5" fill="#fff" opacity="0.55"/>
+          <rect x="13" y="13" width="8" height="8" rx="1.5" fill="#fff" opacity="0.3"/>
+        </svg>
+      </div>
+      BlastLog
+      <span class="status-chip"><span class="status-dot"></span>SITE ACTIVE</span>
+    </div>
+
+    <div class="user-menu">
+      <div class="avatar">{{ username[:2]|upper }}</div>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Log out</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">Operations Overview</div>
+    <h1>Good morning, {{username}}.</h1>
+    <p>Here's where your blast records, site insights, and reporting tools live. Pick a module to get started.</p>
+
+    <div class="stat-strip">
+
+      <div class="stat-cell">
+        <div class="label">Reports — {{ stats.latest_month or "—" }}</div>
+        <div class="value mono">{{ stats.total_reports }}</div>
+      </div>
+
+      <div class="stat-cell">
+        <div class="label">Total Volume</div>
+        <div class="value mono">
+            {{ "%.2f"|format(stats.total_explosive) }}<span>kg</span>
+        </div>
+      </div>
+
+      <div class="stat-cell">
+        <div class="label">Avg. Powder Factor</div>
+        <div class="value mono">
+            {{ "%.2f"|format(stats.avg_pf) }}
+        </div>
+      </div>
+
+      <div class="stat-cell">
+        <div class="label">Holes Drilled</div>
+        <div class="value mono">
+            {{ stats.total_holes }}
+        </div>
+      </div>
+
+    </div>
+</section>
+  <section class="modules">
+    <div class="modules-label">// Select a module</div>
+
+    <div class="module-grid">
+
+      <a href="{{ url_for('insights') }}" class="module-card">
+        <div class="module-index mono">01</div>
+        <div class="module-icon purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Insight</h2>
+        <p>Trends, monthly summaries, and analytics drawn from every logged blast.</p>
+        <div class="module-enter">
+          Open
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </a>
+
+      <a href="{{ url_for('add_data') }}" class="module-card">
+        <div class="module-index mono">03</div>
+        <div class="module-icon amber">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h2>Add Data</h2>
+        <p>Log a new blast — record date, holes, burden, spacing, and explosive volume.</p>
+        <div class="module-enter">
+          Open
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+</body>
+</html>
+ 
