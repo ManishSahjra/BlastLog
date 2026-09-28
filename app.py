@@ -22,8 +22,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-# Gmail Credentials
-# Resend API Key
+
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
@@ -68,22 +67,22 @@ def register():
     username = request.form["username"]
     password = request.form["password"]
 
-    # Generate 6-digit OTP
+   
     otp = random.randint(100000, 999999)
 
     print("Generated OTP:", otp)
 
-    # Store data temporarily
+
     session["otp"] = str(otp)
     session["empid"] = empid
     session["email"] = email
     session["username"] = username
     session["password"] = password
 
-    # Send OTP email
+    
     threading.Thread(target=send_otp, args=(email,otp)).start()
 
-    # Redirect to OTP page
+    
     return redirect(url_for("otp"))
 
 
@@ -161,12 +160,10 @@ def insights():
     if "username" not in session:
         return redirect(url_for("home"))
 
-    # Get logged-in employee's blast data
+    
     logs = get_blast_logs(session["employee_id"])
 
-    # -----------------------------------------
-    # BASIC TOTALS
-    # -----------------------------------------
+
 
     total_reports = len(logs)
 
@@ -180,9 +177,7 @@ def insights():
         for log in logs
     )
 
-    # -----------------------------------------
-    # LOCATION-WISE DATA
-    # -----------------------------------------
+
 
     location_data = {}
 
@@ -210,7 +205,7 @@ def insights():
             log["explosives"] or 0
         )
 
-    # Convert dictionary into list
+
     location_stats = []
 
     for location, data in location_data.items():
@@ -222,15 +217,13 @@ def insights():
             "explosives": data["explosives"]
         })
 
-    # Sort locations by explosives
+   
     location_stats.sort(
         key=lambda x: x["explosives"],
         reverse=True
     )
 
-    # -----------------------------------------
-    # FIND MAX VALUES FOR BAR HEIGHT
-    # -----------------------------------------
+
 
     max_explosives = max(
         [x["explosives"] for x in location_stats],
@@ -242,7 +235,7 @@ def insights():
         default=1
     )
 
-    # Calculate percentage height for bars
+    
     for item in location_stats:
 
         item["explosives_height"] = (
@@ -253,9 +246,7 @@ def insights():
             item["holes"] / max_holes
         ) * 100
 
-    # -----------------------------------------
-    # MONTH-WISE BLAST ACTIVITY
-    # -----------------------------------------
+
 
     month_names = [
         "Jan", "Feb", "Mar", "Apr",
@@ -275,9 +266,6 @@ def insights():
 
             month_counts[month_number - 1] += 1
 
-    # -----------------------------------------
-    # CREATE DYNAMIC SVG POINTS
-    # -----------------------------------------
 
     max_month_count = max(
         month_counts,
@@ -305,9 +293,7 @@ def insights():
         activity_points
     )
 
-    # -----------------------------------------
-    # SEND DATA TO insight.html
-    # -----------------------------------------
+
 
     return render_template(
         "insight.html",
@@ -414,10 +400,10 @@ def clear_month():
     if "employee_id" not in session:
         return redirect(url_for("home"))
 
-    # Get all currently visible records
+
     logs = get_blast_logs(session["employee_id"])
 
-    # Remember their IDs
+
     cleared_ids = [
         log["blast_id"]
         for log in logs
@@ -440,16 +426,12 @@ def export_excel():
     ws = wb.active
     ws.title = "Blast Reports"
 
-    # -----------------------------------------
-    # 5 BLANK ROWS BEFORE HEADER
-    # -----------------------------------------
+
 
     for _ in range(5):
         ws.append([])
 
-    # -----------------------------------------
-    # HEADER - ROW 6
-    # -----------------------------------------
+
 
     headers = [
         "DATE",
@@ -465,13 +447,11 @@ def export_excel():
 
     ws.append(headers)
 
-    # Make headers bold
+
     for cell in ws[6]:
         cell.font = Font(bold=True)
 
-    # -----------------------------------------
-    # BLAST DATA
-    # -----------------------------------------
+
 
     for log in logs:
         ws.append([
@@ -486,36 +466,34 @@ def export_excel():
             log["pf"],
         ])
 
-    # -----------------------------------------
-    # GRAND TOTAL EXPLOSIVES
-    # -----------------------------------------
+
 
     total_explosives = sum(
         float(log["explosives"] or 0)
         for log in logs
     )
 
-    # Last data row
+    
     last_data_row = ws.max_row
 
-    # One blank row before total
+    
     total_row = last_data_row + 1
 
-    # Label
+   
     ws.cell(
         row=total_row,
         column=6,
         value="GRAND TOTAL"
     )
 
-    # Total explosives
+  
     ws.cell(
         row=total_row,
         column=7,
         value=total_explosives
     )
 
-    # Bold
+ 
     ws.cell(
         row=total_row,
         column=6
@@ -526,9 +504,7 @@ def export_excel():
         column=7
     ).font = Font(bold=True)
 
-    # -----------------------------------------
-    # CREATE EXCEL FILE
-    # -----------------------------------------
+
 
     buffer = io.BytesIO()
 
